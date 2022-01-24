@@ -20,12 +20,12 @@ const Map = () => {
   const [currentCircle, setCurrentCircle] = useState();
   const [radius, setRadius] = useState(0);
   const [circleCenter, setCircleCenter] = useState();
+  const [keyInput, setKeyInput]=useState('');
   const [apiKey,setApiKey]=useState('')
-  //use setApiKey for adding an API key while production usage
   const {isLoaded,loadError} = useLoadScript({
     googleMapsApiKey: `${apiKey}&libraries=geometry,places,visualization,drawing`,
   });
-
+  const [isMapMount, setIsMapMount] = useState(false)
 
   const onCircleComplete = (circle) => {
     if (currentCircle) {
@@ -37,9 +37,23 @@ const Map = () => {
     setCircleCenter(circle.center);
   };
 
+  const inputOnChange=(e)=>{
+    setKeyInput(e.target.value)
+  }
+
+  const mountMap=()=>{
+    setApiKey(keyInput)
+    setIsMapMount(true)
+
+  }
+
+  const unMountMap=()=>{
+    setIsMapMount(false)
+
+  }
 
   const renderMap =()=>(
-    <GoogleMap {...googleMapConfig} >
+    <GoogleMap {...googleMapConfig}>
     <DrawingManager
       onCircleComplete={onCircleComplete}
       options={{
@@ -58,9 +72,16 @@ const Map = () => {
   )
 
   return (
-    <div>
-      {isLoaded ? renderMap() : <div>Loading...</div>}
-      {loadError&& <div>Map cannot be loaded right now, sorry.</div>}
+    <div style={{padding:'32px'}}>
+    <div style={{margin:"16px 0"}}>Google Map API Key: 
+    <input type="text" name="keyInput" value={keyInput} onChange={inputOnChange} style={{margin: '0 8px'}}/>
+    {isMapMount?<button onClick={unMountMap}>Unload Map</button>:<button onClick={mountMap}>Load Map</button>}
+    </div>
+    <div style={{border:'1px solid gray',width:'800px'}}>
+    {!isMapMount && <div style={{padding:'16px'}}> Please enter an API Key above. </div>}
+      {isMapMount && (isLoaded ? renderMap() : <div>Loading...</div>)}
+      {loadError && <div>Map cannot be loaded right now, sorry.</div>}
+    </div>
       <div style={{margin:"16px 0"}}>Radius:{radius} m </div>
       <div style={{margin:"16px 0"}}>
         Circle Center:
